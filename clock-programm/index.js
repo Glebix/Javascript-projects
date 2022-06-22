@@ -1,31 +1,57 @@
+const timeDisplay = document.querySelector("#timeDisplay");
+const startBtn = document.querySelector("#startBtn");
+const pauseBtn = document.querySelector("#pauseBtn");
+const resetBtn = document.querySelector("#resetBtn");
 
-const myLabel =  document.getElementById('mylabel');
+let startTime = 0;
+let elapsedTime = 0;
+let currentTime = 0;
+let paused = true;
+let intervalId;
+let hrs = 0;
+let mins = 0;
+let secs = 0;
 
-update();
-setInterval(update,1000)
-
-
-function update(){
-    let date = new Date();
-    myLabel.innerHTML = FormatTime(date);
-
-
-
-    function FormatTime(date){
-        let hours = date.getHours();
-        let minutes = date.getMinutes();
-        let seconds = date.getSeconds();
-        let amorpm = hours >=12 ?"pm":"am";
-        hours = (hours % 12) || 12;
-        hours = FormatZeros(hours);
-        minutes =FormatZeros(minutes);
-        seconds = FormatZeros(seconds);
-
-        return `${hours}:${minutes}:${seconds}${amorpm}`;
+startBtn.addEventListener("click", () => {
+    if(paused){
+        paused = false;
+        startTime = Date.now() - elapsedTime;
+        intervalId = setInterval(updateTime, 1000);
     }
-    function FormatZeros(time){
-        time = time.toString();
-        return time.length <2 ? "0" + time :time;
+});
+pauseBtn.addEventListener("click", () => {
+    if(!paused){
+        paused = true;
+        elapsedTime = Date.now() - startTime;
+        clearInterval(intervalId);
+    }
+});
+resetBtn.addEventListener("click", () => {
+    paused = true;
+    clearInterval(intervalId);
+    startTime = 0;
+    elapsedTime = 0;
+    currentTime = 0;
+    hrs = 0;
+    mins = 0;
+    secs = 0;
+    timeDisplay.textContent = "00:00:00";
+});
 
+function updateTime(){
+    elapsedTime = Date.now() - startTime;
+
+    secs = Math.floor((elapsedTime / 1000) % 60);
+    mins = Math.floor((elapsedTime / (1000 * 60)) % 60);
+    hrs = Math.floor((elapsedTime / (1000 * 60 * 60)) % 60);
+
+    secs = pad(secs);
+    mins = pad(mins);
+    hrs = pad(hrs);
+
+    timeDisplay.textContent = `${hrs}:${mins}:${secs}`;
+
+    function pad(unit){
+        return (("0") + unit).length > 2 ? unit : "0" + unit;
     }
 }
